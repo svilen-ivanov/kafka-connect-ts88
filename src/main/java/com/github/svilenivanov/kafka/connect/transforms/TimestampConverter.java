@@ -1,4 +1,4 @@
-package com.github.howareyouo.kafka.connect.transforms;
+package com.github.svilenivanov.kafka.connect.transforms;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -42,7 +42,7 @@ import static org.apache.kafka.connect.transforms.util.Requirements.requireStruc
 
 public abstract class TimestampConverter<R extends ConnectRecord<R>> implements Transformation<R> {
 
-    public static final String OVERVIEW_DOC = "Convert timestamps between different formats such as Unix epoch, strings, and Connect Date/Timestamp types." + "Applies to individual fields or to the entire value." + "<p/>Use the concrete transformation type designed for the record key (<code>" + TimestampConverter.Key.class.getName() + "</code>) " + "or value (<code>" + TimestampConverter.Value.class.getName() + "</code>).";
+    public static final String OVERVIEW_DOC = "Convert timestamps between different formats such as Epoch since 1/1/1988, strings, and Connect Date/Timestamp types." + "Applies to individual fields or to the entire value." + "<p/>Use the concrete transformation type designed for the record key (<code>" + TimestampConverter.Key.class.getName() + "</code>) " + "or value (<code>" + TimestampConverter.Value.class.getName() + "</code>).";
 
     public static final String FIELDS_CONFIG = "fields";
     private static final String FIELD_DEFAULT = "";
@@ -57,11 +57,11 @@ public abstract class TimestampConverter<R extends ConnectRecord<R>> implements 
     private static final String PURPOSE = "converting timestamp formats";
 
     private static final String TYPE_STRING = "string";
-    private static final String TYPE_UNIX = "unix";
+    private static final String TYPE_TS_88 = "ts88";
     private static final String TYPE_DATE = "Date";
     private static final String TYPE_TIME = "Time";
     private static final String TYPE_TIMESTAMP = "Timestamp";
-    private static final Set<String> VALID_TYPES = new HashSet<>(Arrays.asList(TYPE_STRING, TYPE_UNIX, TYPE_DATE, TYPE_TIME, TYPE_TIMESTAMP));
+    private static final Set<String> VALID_TYPES = new HashSet<>(Arrays.asList(TYPE_STRING, TYPE_TS_88, TYPE_DATE, TYPE_TIME, TYPE_TIMESTAMP));
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
@@ -114,12 +114,21 @@ public abstract class TimestampConverter<R extends ConnectRecord<R>> implements 
             }
         });
 
-        TRANSLATORS.put(TYPE_UNIX, new TimestampTranslator() {
+        TRANSLATORS.put(TYPE_TS_88, new TimestampTranslator() {
+            private final Long offset;
+            {
+                TimeZone zone = TimeZone.getTimeZone("Asia/Jerusalem");
+                Calendar calendar = Calendar.getInstance(zone);
+                calendar.set(1988, Calendar.JANUARY, 1, 0, 0, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                offset = calendar.getTimeInMillis();
+            }
+
             @Override
             public Date toRaw(Config config, Object orig) {
                 if (!(orig instanceof Long))
-                    throw new DataException("Expected Unix timestamp to be a Long, but found " + orig.getClass());
-                return Timestamp.toLogical(Timestamp.SCHEMA, (Long) orig);
+                    throw new DataException("Expected Unix timestamp since 1988 to be a Long, but found " + orig.getClass());
+                return new Date((Long) orig + offset);
             }
 
             @Override
@@ -396,7 +405,7 @@ public abstract class TimestampConverter<R extends ConnectRecord<R>> implements 
             return TYPE_STRING;
         } else if (schema.type().equals(Schema.Type.INT64)) {
             // If not otherwise specified, long == unix time
-            return TYPE_UNIX;
+            return TYPE_TS_88;
         }
         throw new ConnectException("Schema " + schema + " does not correspond to a known timestamp type format");
     }
@@ -410,7 +419,7 @@ public abstract class TimestampConverter<R extends ConnectRecord<R>> implements 
         if (timestamp instanceof Date) {
             return TYPE_TIMESTAMP;
         } else if (timestamp instanceof Long) {
-            return TYPE_UNIX;
+            return TYPE_TS_88;
         } else if (timestamp instanceof String) {
             return TYPE_STRING;
         }

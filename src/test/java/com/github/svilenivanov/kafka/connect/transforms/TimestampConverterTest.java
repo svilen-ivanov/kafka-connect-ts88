@@ -1,4 +1,4 @@
-package com.github.howareyouo.kafka.connect.transforms;
+package com.github.svilenivanov.kafka.connect.transforms;
 
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.data.Date;
@@ -21,6 +21,9 @@ public class TimestampConverterTest {
     private static final long DATE_PLUS_TIME_UNIX;
     private static final String STRING_DATE_FMT = "yyyy MM dd HH mm ss SSS z";
     private static final String DATE_PLUS_TIME_STRING;
+
+    private static final long TS_88_VALUE;
+    private static final Calendar TS_88;
 
     private final TimestampConverter<SourceRecord> xformKey = new TimestampConverter.Key<>();
     private final TimestampConverter<SourceRecord> xformValue = new TimestampConverter.Value<>();
@@ -45,6 +48,12 @@ public class TimestampConverterTest {
 
         DATE_PLUS_TIME_UNIX = DATE_PLUS_TIME.getTime().getTime();
         DATE_PLUS_TIME_STRING = "1970 01 02 00 00 01 234 UTC";
+
+        TS_88_VALUE = 5000;
+        TS_88 = GregorianCalendar.getInstance(TimeZone.getTimeZone("Asia/Jerusalem"));
+        TS_88.set(1988, Calendar.JANUARY, 1, 0, 0, 0);
+        TS_88.set(Calendar.MILLISECOND, (int) TS_88_VALUE);
+
     }
 
 
@@ -112,7 +121,7 @@ public class TimestampConverterTest {
 
     @Test
     public void testSchemalessTimestampToUnix() {
-        xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "unix"));
+        xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "ts88"));
         SourceRecord transformed = xformValue.apply(createRecordSchemaless(DATE_PLUS_TIME.getTime()));
 
         assertNull(transformed.valueSchema());
@@ -157,10 +166,10 @@ public class TimestampConverterTest {
     @Test
     public void testSchemalessUnixToTimestamp() {
         xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "Timestamp"));
-        SourceRecord transformed = xformValue.apply(createRecordSchemaless(DATE_PLUS_TIME_UNIX));
+        SourceRecord transformed = xformValue.apply(createRecordSchemaless(TS_88_VALUE));
 
         assertNull(transformed.valueSchema());
-        assertEquals(DATE_PLUS_TIME.getTime(), transformed.value());
+        assertEquals(TS_88.getTime(), transformed.value());
     }
 
     @Test
@@ -207,7 +216,7 @@ public class TimestampConverterTest {
 
     @Test
     public void testWithSchemaTimestampToUnix() {
-        xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "unix"));
+        xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "ts88"));
         SourceRecord transformed = xformValue.apply(createRecordWithSchema(Timestamp.SCHEMA, DATE_PLUS_TIME.getTime()));
 
         assertEquals(Schema.INT64_SCHEMA, transformed.valueSchema());
@@ -248,8 +257,8 @@ public class TimestampConverterTest {
 
     @Test
     public void testSchemalessNullValueToUnix() {
-        testSchemalessNullValueConversion("unix");
-        testSchemalessNullFieldConversion("unix");
+        testSchemalessNullValueConversion("ts88");
+        testSchemalessNullFieldConversion("ts88");
     }
 
     @Test
@@ -306,10 +315,10 @@ public class TimestampConverterTest {
     @Test
     public void testWithSchemaUnixToTimestamp() {
         xformValue.configure(Collections.singletonMap(TimestampConverter.TARGET_TYPE_CONFIG, "Timestamp"));
-        SourceRecord transformed = xformValue.apply(createRecordWithSchema(Schema.INT64_SCHEMA, DATE_PLUS_TIME_UNIX));
+        SourceRecord transformed = xformValue.apply(createRecordWithSchema(Schema.INT64_SCHEMA, TS_88_VALUE));
 
         assertEquals(Timestamp.SCHEMA, transformed.valueSchema());
-        assertEquals(DATE_PLUS_TIME.getTime(), transformed.value());
+        assertEquals(TS_88.getTime(), transformed.value());
     }
 
     @Test
@@ -346,20 +355,20 @@ public class TimestampConverterTest {
 
     @Test
     public void testWithSchemaNullValueToUnix() {
-        testWithSchemaNullValueConversion("unix", Schema.OPTIONAL_INT64_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullValueConversion("unix", TimestampConverter.OPTIONAL_TIME_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullValueConversion("unix", TimestampConverter.OPTIONAL_DATE_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullValueConversion("unix", Schema.OPTIONAL_STRING_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullValueConversion("unix", TimestampConverter.OPTIONAL_TIMESTAMP_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullValueConversion("ts88", Schema.OPTIONAL_INT64_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullValueConversion("ts88", TimestampConverter.OPTIONAL_TIME_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullValueConversion("ts88", TimestampConverter.OPTIONAL_DATE_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullValueConversion("ts88", Schema.OPTIONAL_STRING_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullValueConversion("ts88", TimestampConverter.OPTIONAL_TIMESTAMP_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
     }
 
     @Test
     public void testWithSchemaNullFieldToUnix() {
-        testWithSchemaNullFieldConversion("unix", Schema.OPTIONAL_INT64_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullFieldConversion("unix", TimestampConverter.OPTIONAL_TIME_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullFieldConversion("unix", TimestampConverter.OPTIONAL_DATE_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullFieldConversion("unix", Schema.OPTIONAL_STRING_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
-        testWithSchemaNullFieldConversion("unix", TimestampConverter.OPTIONAL_TIMESTAMP_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullFieldConversion("ts88", Schema.OPTIONAL_INT64_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullFieldConversion("ts88", TimestampConverter.OPTIONAL_TIME_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullFieldConversion("ts88", TimestampConverter.OPTIONAL_DATE_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullFieldConversion("ts88", Schema.OPTIONAL_STRING_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
+        testWithSchemaNullFieldConversion("ts88", TimestampConverter.OPTIONAL_TIMESTAMP_SCHEMA, Schema.OPTIONAL_INT64_SCHEMA);
     }
 
     @Test
@@ -487,7 +496,7 @@ public class TimestampConverterTest {
                 .field("other", Schema.STRING_SCHEMA)
                 .build();
         Struct original = new Struct(structWithTimestampFieldSchema);
-        original.put("ts", DATE_PLUS_TIME_UNIX);
+        original.put("ts", TS_88_VALUE);
         original.put("other", "test");
 
         SourceRecord transformed = xformValue.apply(createRecordWithSchema(structWithTimestampFieldSchema, original));
@@ -497,7 +506,7 @@ public class TimestampConverterTest {
                 .field("other", Schema.STRING_SCHEMA)
                 .build();
         assertEquals(expectedSchema, transformed.valueSchema());
-        assertEquals(DATE_PLUS_TIME.getTime(), ((Struct) transformed.value()).get("ts"));
+        assertEquals(TS_88.getTime(), ((Struct) transformed.value()).get("ts"));
         assertEquals("test", ((Struct) transformed.value()).get("other"));
     }
 

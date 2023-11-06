@@ -14,7 +14,7 @@ Below configuration snippet shows how to use `TimestampConverter` to transform J
 
 ```
 "transforms": "TimestampConverter",
-"transforms.TimestampConverter.type": "com.github.howareyouo.kafka.connect.transforms.TimestampConverter$Value",
+"transforms.TimestampConverter.type": "com.github.svilenivanov.kafka.connect.transforms.TimestampConverter$Value",
 "transforms.TimestampConverter.format": "yyyy-MM-dd'T'HH:mm:ss'Z'"
 "transforms.TimestampConverter.target.type": "Timestamp"
 "transforms.TimestampConverter.fields": "created_at,updated_at,visited_at,..."
