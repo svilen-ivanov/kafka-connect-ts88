@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>kafka-connect-timestamp-converter</artifactId>
+    <artifactId>kafka-connect-ts88-converter</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -42,5 +42,5 @@
 
 
     </dependencies>
-    
+
 </project>
