@@ -6,7 +6,7 @@ It change the property `field` to `fields` , allows us handle multiple fields at
 
 ## Usages
 Download the jar file from
-[Release](https://github.com/howareyouo/kafka-connect-timestamp-converter/releases) page.
+[Release](https://github.com/svilen-ivanov/kafka-connect-ts88/releases) page.
 Drag it into you `plugin.path` folders (each of them).
 
 ## Example
