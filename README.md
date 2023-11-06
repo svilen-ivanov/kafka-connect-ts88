@@ -10,7 +10,9 @@ Download the jar file from
 Drag it into you `plugin.path` folders (each of them).
 
 ## Example
-Below configuration snippet shows how to use `TimestampConverter` to transform JSON formatted `timestamp` (represented as an `IOS-8601` string value, which comes from the Debezium JDBC source connector) into target type `Timestamp`(used by the following Confluent JDBC sink connector).
+Interprets input `Schema.INT64_SCHEMA` numbers as milliseconds since 1/1/1988 in Asia/Jerusalem timezone.
+
+Below configuration snippet shows how to use `TimestampConverter` to transform into target type `Timestamp`.
 
 ```
 "transforms": "TimestampConverter",
@@ -18,5 +20,4 @@ Below configuration snippet shows how to use `TimestampConverter` to transform J
 "transforms.TimestampConverter.format": "yyyy-MM-dd'T'HH:mm:ss'Z'"
 "transforms.TimestampConverter.target.type": "Timestamp"
 "transforms.TimestampConverter.fields": "created_at,updated_at,visited_at,..."
-
 ```
